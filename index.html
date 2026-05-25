@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sercan Özkan | Holo-Cyber OS Portfolio Terminal</title>
+  <meta name="description" content="Boot up Sercan Özkan's interactive Holo-Cyber Operating System. Run diagnostic waves, matrix rain streams, and space shootemup cabinets.">
+  <link rel="stylesheet" href="style.css">
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="theme-cyan"> <!-- Default Cyber Cyan theme -->
+
+  <!-- Starfield nodes backdrop -->
+  <canvas id="bg-canvas"></canvas>
+
+  <!-- Physical CRT Cabinet Bezel -->
+  <div class="monitor-bezel">
+    <!-- Curved Glass Display -->
+    <div class="crt-glass">
+      <!-- Shader line sweeps -->
+      <div class="scanlines"></div>
+      <div class="scanlines-roll"></div>
+      
+      <!-- Flicker Layer wrapper -->
+      <div class="flicker" id="flicker-overlay">
+        
+        <!-- Main Desktop Workspace -->
+        <div class="desktop-space" id="desktop-area">
+          
+          <!-- Desktop Shortcuts Grid -->
+          <div class="desktop-grid">
+            <div class="desktop-icon" data-open="win-about">
+              <i class="fa-solid fa-circle-info"></i>
+              <span>ABOUT_ME.TXT</span>
+            </div>
+            
+            <div class="desktop-icon" data-open="win-projects">
+              <i class="fa-solid fa-folder-open"></i>
+              <span>PROJECTS.DIR</span>
+            </div>
+
+            <div class="desktop-icon" data-open="win-skills">
+              <i class="fa-solid fa-server"></i>
+              <span>SYSTEMS_STACK</span>
+            </div>
+
+            <div class="desktop-icon" data-open="win-scanner">
+              <i class="fa-solid fa-print"></i>
+              <span>CV_ATS_SCANNER</span>
+            </div>
+
+            <div class="desktop-icon" data-open="win-arcade">
+              <i class="fa-solid fa-gamepad"></i>
+              <span>SPACE_DUEL.EXE</span>
+            </div>
+
+            <div class="desktop-icon" data-open="win-cli">
+              <i class="fa-solid fa-terminal"></i>
+              <span>CLI_SHELL.SH</span>
+            </div>
+
+            <div class="desktop-icon" data-open="win-matrix">
+              <i class="fa-solid fa-code"></i>
+              <span>MATRIX_RAIN.BIN</span>
+            </div>
+
+            <div class="desktop-icon" data-open="win-diagnostics">
+              <i class="fa-solid fa-chart-line"></i>
+              <span>DIAG_OSCILLOSCOPE</span>
+            </div>
+
+            <div class="desktop-icon" data-open="win-contact">
+              <i class="fa-solid fa-envelope"></i>
+              <span>CONTACT_MAIL</span>
+            </div>
+
+            <div class="desktop-icon" data-open="win-compiler">
+              <i class="fa-solid fa-laptop-code"></i>
+              <span>COMPILER.EXE</span>
+            </div>
+
+            <div class="desktop-icon" data-open="win-theme">
+              <i class="fa-solid fa-palette"></i>
+              <span>THEME_MANAGER</span>
+            </div>
+          </div>
+
+
+          <!-- ============================================== -->
+          <!-- CASCADING DESKTOP WINDOW OBJECTS -->
+          <!-- ============================================== -->
+
+          <!-- 1. ABOUT ME WINDOW -->
+          <div class="window" id="win-about" style="top:20px; left:200px; width:450px;">
+            <div class="window-titlebar">
+              <span>[FILE] - ABOUT_ME.TXT</span>
+              <div class="window-controls">
+                <button class="win-btn win-min" data-win="win-about">_</button>
+                <button class="win-btn win-close" data-win="win-about">X</button>
+              </div>
+            </div>
+            <div class="window-body">
+              <h4 style="color:var(--primary); margin-bottom:0.5rem; text-shadow:0 0 5px var(--primary-glow);">SERCAN ÖZKAN | PROFILE</h4>
+              <p style="margin-bottom:0.8rem;">Computer Engineering student specializing in backend logical pipelines and AI integration setups.</p>
+              <p style="margin-bottom:0.8rem; font-size:0.7rem;">I enjoy building practical web scripts, designing structured relational databases, and formatting custom models to parse data like CV texts.</p>
+              
+              <h5 style="color:var(--primary); margin-bottom:0.4rem; font-size:0.6rem;">OPERATIONAL PHILOSOPHY:</h5>
+              <pre style="background:var(--bg-darker); border:1px dashed var(--primary); padding:8px; font-size:0.65rem; color:var(--primary); overflow-x:auto;">
+Idea Model -> Logical Prototype -> DB Integration -> UI Polish</pre>
+              <p style="margin-top:0.8rem; font-size:0.65rem; color:var(--text-muted);">🎯 Goals: Build strong modular codes, automate routine parsing, and optimize database payloads.</p>
+            </div>
+          </div>
+
+          <!-- 2. PROJECTS WINDOW -->
+          <div class="window" id="win-projects" style="top:40px; left:220px; width:450px;">
+            <div class="window-titlebar">
+              <span>[EXPLORER] - C:\PROJECTS\</span>
+              <div class="window-controls">
+                <button class="win-btn win-min" data-win="win-projects">_</button>
+                <button class="win-btn win-close" data-win="win-projects">X</button>
+              </div>
+            </div>
+            <div class="window-body">
+              <p style="color:var(--primary); margin-bottom:0.8rem; font-size:0.65rem;">DOUBLE-CLICK FILE TO COMPILE DETAILS:</p>
+              <ul class="tree-list">
+                <li class="tree-node"><span class="tree-file" data-proj="cv">cv_analyzer.py</span></li>
+                <li class="tree-node"><span class="tree-file" data-proj="space">space_duel.js</span></li>
+                <li class="tree-node last"><span class="tree-file" data-proj="food">foodapp_server.js</span></li>
+              </ul>
+              
+              <!-- Expansion area -->
+              <div id="proj-detail-panel" style="margin-top:1.2rem; padding:0.8rem; border:1px solid var(--primary); background:var(--bg-darker); display:none;">
+                <h4 id="proj-detail-name" style="color:var(--primary); margin-bottom:0.4rem; font-size:0.7rem; text-transform:uppercase;"></h4>
+                <p id="proj-detail-desc" style="font-size:0.7rem; margin-bottom:0.8rem;"></p>
+                <p style="font-size:0.65rem; color:var(--text-muted); margin-bottom:0.8rem;">
+                  STACK: <span id="proj-detail-stack" style="color:var(--primary);"></span>
+                </p>
+                <a href="#" class="form-submit-btn" id="proj-detail-href" target="_blank" style="text-decoration:none; display:inline-block; font-size:0.5rem;">COMPILE_SOURCE</a>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3. TECH STACK SYSTEMS WINDOW -->
+          <div class="window" id="win-skills" style="top:60px; left:240px; width:420px;">
+            <div class="window-titlebar">
+              <span>[MONITOR] - SKILLS_CAPABILITIES</span>
+              <div class="window-controls">
+                <button class="win-btn win-min" data-win="win-skills">_</button>
+                <button class="win-btn win-close" data-win="win-skills">X</button>
+              </div>
+            </div>
+            <div class="window-body">
+              <p style="color:var(--primary); margin-bottom:1rem; font-size:0.6rem;">HARDWARE RESOURCE LEVELS FOR SERCAN'S CORE COMPETENCIES:</p>
+              
+              <div class="metric-row">
+                <span class="metric-lbl">AI_PROMPTING:</span>
+                <div class="metric-bar-wrap">
+                  <div class="metric-bar-fill" id="mbar-ai"></div>
+                </div>
+                <span>90%</span>
+              </div>
+
+              <div class="metric-row">
+                <span class="metric-lbl">BACKEND_LOGIC:</span>
+                <div class="metric-bar-wrap">
+                  <div class="metric-bar-fill" id="mbar-backend"></div>
+                </div>
+                <span>85%</span>
+              </div>
+
+              <div class="metric-row">
+                <span class="metric-lbl">DATABASES_SQL:</span>
+                <div class="metric-bar-wrap">
+                  <div class="metric-bar-fill" id="mbar-db"></div>
+                </div>
+                <span>78%</span>
+              </div>
+
+              <div class="metric-row">
+                <span class="metric-lbl">DESKTOP_SYSTEMS:</span>
+                <div class="metric-bar-wrap">
+                  <div class="metric-bar-fill" id="mbar-desktop"></div>
+                </div>
+                <span>70%</span>
+              </div>
+
+              <p style="font-size:0.65rem; color:var(--text-muted); margin-top:1.2rem; line-height:1.4;">
+                > STACK_LOGS: System fully loaded. Supporting language paths including Python, C++, Java, Node, Express, FastAPI, and MySQL database queries.
+              </p>
+            </div>
+          </div>
+
+          <!-- 4. CV ATS SCANNER WINDOW -->
+          <div class="window" id="win-scanner" style="top:80px; left:260px; width:480px;">
+            <div class="window-titlebar">
+              <span>[UTILITY] - CV_ATS_ANALYZER</span>
+              <div class="window-controls">
+                <button class="win-btn win-min" data-win="win-scanner">_</button>
+                <button class="win-btn win-close" data-win="win-scanner">X</button>
+              </div>
+            </div>
+            <div class="window-body">
+              <div class="scanner-container">
+                <div class="retro-form-group">
+                  <label style="font-size:0.5rem; color:var(--primary);">SELECT RESUME PRESET CREDENTIALS:</label>
+                  <select class="form-input-box" id="scan-cv-opt" style="background:var(--bg-darker);">
+                    <option value="student">Sercan Özkan (Computer Engineering Student)</option>
+                    <option value="junior">Junior Web Developer (Vanilla HTML/CSS/JS)</option>
+                    <option value="marketing">Sales Executive (Non-technical)</option>
+                  </select>
+                </div>
+
+                <div class="retro-form-group">
+                  <label style="font-size:0.5rem; color:var(--primary);">SELECT TARGET JOB VACANCY DESCRIPTION:</label>
+                  <select class="form-input-box" id="scan-job-opt" style="background:var(--bg-darker);">
+                    <option value="ai">AI Tools & Backend Developer Intern</option>
+                    <option value="web">React Web UI Programmer</option>
+                    <option value="sales">Digital Marketing Campaign Officer</option>
+                  </select>
+                </div>
+
+                <button class="form-submit-btn" id="btn-run-scan" style="width:100%;">START_MAIN_ATS_SCAN()</button>
+
+                <!-- Processing bar -->
+                <div class="scan-progress" id="scan-progress-bar">
+                  <div class="scan-fill" id="scan-progress-fill"></div>
+                </div>
+
+                <!-- Outputs panel -->
+                <div class="scan-results-panel" id="scan-results-hud">
+                  <h4 style="color:var(--primary); margin-bottom:0.5rem; font-size:0.7rem;">MATCH RATING: <span id="scan-match-val">0</span>%</h4>
+                  <p id="scan-match-assess" style="font-size:0.65rem; margin-bottom:0.8rem; line-height:1.4;"></p>
+                  <div style="font-size:0.65rem; color:var(--text-muted);">
+                    <strong>STRENGTHS:</strong>
+                    <ul id="scan-match-strengths" style="padding-left:10px; margin-bottom:0.4rem;"></ul>
+                    <strong>GAPS & ADVICE:</strong>
+                    <ul id="scan-match-gaps" style="padding-left:10px;"></ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 5. SPACE DUEL ARCADE WINDOW -->
+          <div class="window" id="win-arcade" style="top:30px; left:280px; width:480px;">
+            <div class="window-titlebar">
+              <span>[GAME] - SPACE_DUEL.EXE</span>
+              <div class="window-controls">
+                <button class="win-btn win-min" data-win="win-arcade">_</button>
+                <button class="win-btn win-close" data-win="win-arcade">X</button>
+              </div>
+            </div>
+            <div class="window-body" style="padding:0.4rem; overflow:hidden;">
+              <div class="arcade-panel">
+                <p style="font-size:0.5rem; color:var(--primary); font-family:var(--font-retro); text-align:center;">
+                  A/D or ARROWS = MOVE • SPACE = FIRE
+                </p>
+                <canvas id="arcade-canvas" width="460" height="280"></canvas>
+                <div style="display:flex; justify-content:space-between; width:100%; font-size:0.55rem; padding:0 10px; color:var(--primary);">
+                  <span>SCORE: <span id="arc-score">0000</span></span>
+                  <span>HI_SCORE: <span id="arc-highscore">0150</span></span>
+                  <span>SHIELD: <span id="arc-shield">III</span></span>
+                </div>
+                <!-- On-screen mobile arcade overlay -->
+                <div class="arcade-dpad">
+                  <button class="arcade-dpad-btn" id="btn-arc-left">LEFT</button>
+                  <button class="arcade-dpad-btn" id="btn-arc-fire">FIRE</button>
+                  <button class="arcade-dpad-btn" id="btn-arc-right">RIGHT</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 6. HACKER CLI TERMINAL WINDOW -->
+          <div class="window" id="win-cli" style="top:100px; left:180px; width:460px;">
+            <div class="window-titlebar">
+              <span>[SHELL] - CLI_SHELL.SH</span>
+              <div class="window-controls">
+                <button class="win-btn win-min" data-win="win-cli">_</button>
+                <button class="win-btn win-close" data-win="win-cli">X</button>
+              </div>
+            </div>
+            <div class="window-body" style="padding:0.5rem;">
+              <div class="terminal-screen" id="cli-screen">
+                <div class="terminal-line">
+                  Welcome to Sercan's mainframe interface.
+                  Type <span style="color:var(--secondary);">help</span> to view available scripts and files.
+                </div>
+                <div class="terminal-line" style="display:flex; gap:5px;">
+                  <span class="term-prompt">sercan@mainframe:~$</span>
+                  <input type="text" class="term-input-field" id="cli-input-box" autofocus autocomplete="off" placeholder="type command..."/>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 7. MATRIX CODE RAIN WINDOW -->
+          <div class="window" id="win-matrix" style="top:110px; left:300px; width:440px;">
+            <div class="window-titlebar">
+              <span>[RENDER] - MATRIX_RAIN.BIN</span>
+              <div class="window-controls">
+                <button class="win-btn win-min" data-win="win-matrix">_</button>
+                <button class="win-btn win-close" data-win="win-matrix">X</button>
+              </div>
+            </div>
+            <div class="window-body" style="padding:0.5rem; overflow:hidden;">
+              <canvas id="matrix-canvas" width="420" height="240"></canvas>
+              <div class="matrix-controls-row">
+                <button class="theme-opt-btn" id="btn-mat-color" style="flex-grow:1;">TOGGLE_COLOR</button>
+                <button class="theme-opt-btn" id="btn-mat-speed" style="flex-grow:1;">CYCLE_SPEED</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- 8. HARDWARE DIAGNOSTIC WINDOW -->
+          <div class="window" id="win-diagnostics" style="top:120px; left:320px; width:440px;">
+            <div class="window-titlebar">
+              <span>[MONITOR] - DIAG_OSCILLOSCOPE</span>
+              <div class="window-controls">
+                <button class="win-btn win-min" data-win="win-diagnostics">_</button>
+                <button class="win-btn win-close" data-win="win-diagnostics">X</button>
+              </div>
+            </div>
+            <div class="window-body">
+              <canvas id="diagnostic-canvas" width="400" height="120"></canvas>
+              <div class="diag-metrics-grid">
+                <div>
+                  <strong>CPU_LOAD:</strong> <span id="diag-cpu-val" style="color:var(--primary);">0</span>%<br>
+                  <strong>MEM_ALLOC:</strong> 342MB / 512MB<br>
+                </div>
+                <div>
+                  <strong>SYSTEM_CLOCK:</strong> <span id="diag-time" style="color:var(--secondary);">0</span>Hz<br>
+                  <strong>INTEGRITY:</strong> NOMINAL
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 9. CONTACT MAIL CLIENT WINDOW -->
+          <div class="window" id="win-contact" style="top:140px; left:200px; width:430px;">
+            <div class="window-titlebar">
+              <span>[MAIL] - CONTACT_MAIL</span>
+              <div class="window-controls">
+                <button class="win-btn win-min" data-win="win-contact">_</button>
+                <button class="win-btn win-close" data-win="win-contact">X</button>
+              </div>
+            </div>
+            <div class="window-body">
+              <form class="retro-form" id="os-contact-form" onsubmit="event.preventDefault(); alert('Message buffered in transmission queues!');">
+                <div class="retro-form-group">
+                  <label>SENDER_IDENTITY:</label>
+                  <input type="text" class="form-input-box" id="contact-name" placeholder="Client Name" required>
+                </div>
+                <div class="retro-form-group">
+                  <label>SENDER_GATEWAY:</label>
+                  <input type="email" class="form-input-box" id="contact-email" placeholder="client@gateway.net" required>
+                </div>
+                <div class="retro-form-group">
+                  <label>MESSAGE_STREAM:</label>
+                  <textarea class="form-input-box" id="contact-body" rows="4" placeholder="Type message data..." required style="resize:none;"></textarea>
+                </div>
+                <button type="submit" class="form-submit-btn">TRANSMIT_MESSAGE()</button>
+              </form>
+            </div>
+          </div>
+
+          <!-- 10. THEME MANAGER WINDOW -->
+          <div class="window" id="win-theme" style="top:150px; left:340px; width:360px;">
+            <div class="window-titlebar">
+              <span>[SETTINGS] - THEME_MANAGER</span>
+              <div class="window-controls">
+                <button class="win-btn win-min" data-win="win-theme">_</button>
+                <button class="win-btn win-close" data-win="win-theme">X</button>
+              </div>
+            </div>
+            <div class="window-body">
+              <p style="color:var(--primary); margin-bottom:0.8rem; font-size:0.6rem;">SELECT GRAPHICS PALETTE OVERWRITE CONFIGURATION:</p>
+              <div class="theme-selector-grid">
+                <button class="theme-opt-btn" data-theme="cyberpunk">CYBERPUNK (YEL/CYAN)</button>
+                <button class="theme-opt-btn" data-theme="matrix">MATRIX (GREEN)</button>
+                <button class="theme-opt-btn" data-theme="vaporwave">VAPORWAVE (PINK)</button>
+                <button class="theme-opt-btn" data-theme="amber">AMBER (ORANGE)</button>
+                <button class="theme-opt-btn" data-theme="cyan" style="grid-column: span 2;">NEON CYAN (DEFAULT)</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- 11. MANUALLY CODED COMPILER WINDOW -->
+          <div class="window" id="win-compiler" style="top:30px; left:80px; width:760px; height:500px; display:none;">
+            <div class="window-titlebar">
+              <span>[EXE] - COMPILER_DESIGN.EXE (Two-Pass)</span>
+              <div class="window-controls">
+                <button class="win-btn win-min" data-win="win-compiler">_</button>
+                <button class="win-btn win-close" data-win="win-compiler">X</button>
+              </div>
+            </div>
+            <div class="window-body" style="padding:0.5rem; display:flex; flex-direction:column; gap:0.5rem; overflow:hidden; max-height:none; height:calc(100% - 28px);">
+              <!-- Top Control Bar -->
+              <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px dashed var(--primary); padding-bottom:0.5rem;">
+                <div style="font-size:0.6rem; color:var(--text-main);">
+                  LANGUAGE: SUBSET_HIGH_LEVEL • PASSES: 2 • COMPILER: HAND-CODED
+                </div>
+                <div style="display:flex; gap:0.5rem;">
+                  <button class="theme-opt-btn" id="btn-comp-sample" style="padding:4px 10px; font-size:0.5rem;">LOAD_SAMPLE</button>
+                  <button class="theme-opt-btn" id="btn-comp-clear" style="padding:4px 10px; font-size:0.5rem;">CLEAR</button>
+                  <button class="form-submit-btn" id="btn-comp-run" style="padding:4px 12px; font-size:0.55rem; box-shadow:0 0 8px var(--primary-glow);">RUN_COMPILER()</button>
+                </div>
+              </div>
+
+              <!-- Main Split Panels -->
+              <div style="display:flex; gap:0.5rem; flex-grow:1; overflow:hidden; height:calc(100% - 40px);">
+                <!-- Left Pane: Code Editor -->
+                <div style="width:45%; display:flex; flex-direction:column; border:1px solid var(--primary); background:var(--bg-darker); overflow:hidden;">
+                  <div style="background:var(--primary); color:var(--bg-darker); font-size:0.5rem; font-weight:bold; padding:4px 8px; display:flex; justify-content:space-between;">
+                    <span>SOURCE_EDITOR.SRC</span>
+                    <span id="editor-line-counter">LN 1, COL 1</span>
+                  </div>
+                  <div style="display:flex; flex-grow:1; overflow:hidden; position:relative;">
+                    <div id="editor-line-gutter" style="width:30px; background:rgba(0,0,0,0.3); border-right:1px solid rgba(255,255,255,0.05); color:var(--text-muted); font-family:var(--font-mono); font-size:0.7rem; text-align:right; padding:6px 6px 6px 0; user-select:none; line-height:1.4; overflow:hidden;">
+                      1
+                    </div>
+                    <textarea id="compiler-editor-textarea" style="flex-grow:1; background:transparent; border:none; outline:none; color:var(--text-main); font-family:var(--font-mono); font-size:0.7rem; line-height:1.4; padding:6px; resize:none; overflow-y:auto; word-break:keep-all; white-space:pre;" spellcheck="false" placeholder="// Type source code here..."></textarea>
+                  </div>
+                </div>
+
+                <!-- Right Pane: Compilation Results Tabs -->
+                <div style="width:55%; display:flex; flex-direction:column; border:1px solid var(--primary); overflow:hidden; background:rgba(0,0,0,0.25);">
+                  <!-- Tabs Head -->
+                  <div style="display:flex; background:var(--bg-darker); border-bottom:1px solid var(--primary); font-size:0.5rem;">
+                    <button class="comp-tab-btn active" data-tab="tab-lexer" style="flex:1; background:transparent; border:none; border-right:1px solid var(--primary); color:var(--primary); padding:6px; cursor:pointer; font-family:var(--font-retro); font-size:0.42rem;">LEXER</button>
+                    <button class="comp-tab-btn" data-tab="tab-symtable" style="flex:1; background:transparent; border:none; border-right:1px solid var(--primary); color:var(--text-muted); padding:6px; cursor:pointer; font-family:var(--font-retro); font-size:0.42rem;">SYMBOLS</button>
+                    <button class="comp-tab-btn" data-tab="tab-ast" style="flex:1; background:transparent; border:none; border-right:1px solid var(--primary); color:var(--text-muted); padding:6px; cursor:pointer; font-family:var(--font-retro); font-size:0.42rem;">AST_TREE</button>
+                    <button class="comp-tab-btn" data-tab="tab-tac" style="flex:1; background:transparent; border:none; border-right:1px solid var(--primary); color:var(--text-muted); padding:6px; cursor:pointer; font-family:var(--font-retro); font-size:0.42rem;">IR_CODE</button>
+                    <button class="comp-tab-btn" data-tab="tab-diagnostics" style="flex:1; background:transparent; border:none; color:var(--text-muted); padding:6px; cursor:pointer; font-family:var(--font-retro); font-size:0.42rem;">DIAGS</button>
+                  </div>
+                  <!-- Tabs Contents -->
+                  <div style="flex-grow:1; overflow-y:auto; padding:0.5rem; position:relative;">
+                    
+                    <!-- 1. Lexer Tab -->
+                    <div class="comp-tab-content active" id="tab-lexer">
+                      <table style="width:100%; border-collapse:collapse; font-size:0.65rem; text-align:left;">
+                        <thead>
+                          <tr style="border-bottom:1px solid var(--primary); color:var(--primary);">
+                            <th style="padding:4px;">LINE</th>
+                            <th style="padding:4px;">TOKEN</th>
+                            <th style="padding:4px;">TYPE</th>
+                          </tr>
+                        </thead>
+                        <tbody id="lexer-token-table-body">
+                          <tr>
+                            <td colspan="3" style="text-align:center; padding:10px; color:var(--text-muted);">No token stream loaded. Click RUN_COMPILER().</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+
+                    <!-- 2. Symbol Table Tab -->
+                    <div class="comp-tab-content" id="tab-symtable" style="display:none;">
+                      <table style="width:100%; border-collapse:collapse; font-size:0.65rem; text-align:left;">
+                        <thead>
+                          <tr style="border-bottom:1px solid var(--primary); color:var(--primary);">
+                            <th style="padding:4px;">NAME</th>
+                            <th style="padding:4px;">TYPE</th>
+                            <th style="padding:4px;">SCOPE</th>
+                            <th style="padding:4px;">OFFSET</th>
+                            <th style="padding:4px;">LINE</th>
+                          </tr>
+                        </thead>
+                        <tbody id="symbol-table-body">
+                          <tr>
+                            <td colspan="5" style="text-align:center; padding:10px; color:var(--text-muted);">Symbol table empty.</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+
+                    <!-- 3. AST / Parse Tree Tab -->
+                    <div class="comp-tab-content" id="tab-ast" style="display:none;">
+                      <pre id="ast-tree-view" style="font-family:var(--font-mono); font-size:0.65rem; color:var(--text-main); white-space:pre; margin:0; line-height:1.3;">No AST generated.</pre>
+                    </div>
+
+                    <!-- 3.5. IR Code (TAC) Tab -->
+                    <div class="comp-tab-content" id="tab-tac" style="display:none;">
+                      <pre id="tac-code-view" style="font-family:var(--font-mono); font-size:0.65rem; color:var(--text-main); white-space:pre; margin:0; line-height:1.3; color:#a3ffa3; text-shadow: 0 0 5px rgba(163, 255, 163, 0.35);">No IR generated.</pre>
+                    </div>
+
+                    <!-- 4. Diagnostics Tab -->
+                    <div class="comp-tab-content" id="tab-diagnostics" style="display:none;">
+                      <div id="diagnostics-summary" style="margin-bottom:0.8rem; font-size:0.7rem;">
+                        <span style="color:var(--text-muted);">STATUS: </span><span style="color:var(--primary);">IDLE</span>
+                      </div>
+                      <div id="diagnostics-errors-list" style="display:flex; flex-direction:column; gap:0.4rem;">
+                        <!-- error lines -->
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div> <!-- /desktop-space -->
+
+        <!-- Bottom Taskbar Control Center -->
+        <div class="taskbar">
+          <button class="taskbar-start" id="btn-start-os">START</button>
+          
+          <div class="active-window-tabs" id="taskbar-active-tabs">
+            <!-- Dynamic window tabs index loaded by JS -->
+          </div>
+          
+          <div class="taskbar-clock" id="os-taskbar-clock">00:00:00</div>
+        </div>
+
+        <!-- Physical Bezel Switches -->
+        <div class="bezel-control-bar">
+          <span>PORT_MAIN_CRT</span>
+          <div class="bezel-btn-grid">
+            <button class="bezel-switch active-switch" id="sw-flicker" title="CRT Phosphor Flicker"></button>
+            <button class="bezel-switch" id="sw-power" title="System Main Power Switch" style="background:#ef4444; border-color:#000;"></button>
+          </div>
+        </div>
+
+      </div> <!-- /flicker -->
+    </div> <!-- /crt-glass -->
+  </div> <!-- /monitor-bezel -->
+
+  <script src="compiler_engine.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
