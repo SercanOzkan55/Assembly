@@ -1,252 +1,328 @@
-# ACADEMIC PROJECT REPORT: DESIGN AND IMPLEMENTATION OF A SIMPLE TWO-PASS COMPILER WITH INTERMEDIATE CODE GENERATION
+# ISTANBUL HEALTH AND TECHNOLOGY UNIVERSITY
+## FACULTY OF ENGINEERING AND NATURAL SCIENCES
+## DEPARTMENT OF COMPUTER ENGINEERING
 
-**Course:** System Programming (Spring 2025-2026)  
-**Department:** Computer/Software Engineering Department  
-**Faculty:** Faculty of Engineering, Istanbul Health and Technology University  
-**Instructor:** Computer/Software Engineering Department Academic Faculty  
-**Student Name:** Sercan Özkan  
-**Student ID:** SercanOzkan55  
-**Submission Date:** 02.06.2026  
+**2025 - 2026 ACADEMIC YEAR**  
+**3rd GRADE**
 
 ---
 
-## 1. Introduction and Objectives
-
-This project presents the comprehensive design and hand-coded implementation of a functional **Two-Pass Compiler** (augmented with a third pass for Intermediate Representation / Three-Address Code generation) for a structured subset of a high-level imperative programming language. 
-
-Compilers are complex software systems divided into a **Front-End** (analysis) and a **Back-End** (synthesis). The front-end is responsible for checking syntax, understanding semantic meaning, and building an intermediate structure, while the back-end compiles this structure into target assembly, virtual machine bytecodes, or machine instructions. This project focuses on the foundational analysis phases, static semantics verification, symbol table scope modeling, and intermediate representation (IR) assembly generation.
-
-### 1.1 Objectives
-The primary objectives of this project are:
-- To design a context-free grammar (CFG) in Backus-Naur Form (BNF) representing programming language constructs such as variable declarations, assignments, loop iterations, conditional branches, and arithmetic evaluations.
-- To implement **Pass 1 (Lexical Analyzer)** that scans source characters, handles multi-line comments, maintains scoping offsets, and constructs a token stream.
-- To implement **Pass 2 (Syntax and Semantic Analyzer)** using a hand-coded recursive descent parser that validates syntax, recovers from minor errors, builds an Abstract Syntax Tree (AST), and performs static type checking.
-- To design a block-scoped **Symbol Table** maintaining variable types, declaration lines, scope levels, and memory offset structures.
-- To write an **Intermediate Representation (IR)** generator translating source statements into Three-Address Code (TAC) representing assembly-level instruction jumps.
-- To implement a **Web GUI Dashboard** showing live compiler tokenization, symbol properties, ASCII syntax trees, intermediate codes, and line-mapped compiler diagnostics.
+# SYSTEM PROGRAMMING
+## FINAL PROJECT REPORT: DESIGN AND IMPLEMENTATION OF A SIMPLE TWO-PASS COMPILER WITH INTERMEDIATE CODE GENERATION
 
 ---
 
-## 2. Source Language Grammar (BNF)
+### Submitted by:
+* **Sercan Özkan** | Student ID: **220611005**
+* **Berat Kahraman** | Student ID: **220610038**
 
-To implement a parser without using compiler-generators (e.g., Lex, Yacc, ANTLR), the language grammar must be unambiguous and free of left-recursion. Left-recursion causes recursive descent parsers to enter infinite loops, and ambiguity makes parsing non-deterministic.
+### Submitted to:
+* **Academic Course Faculty**
 
-We designed a context-free grammar suitable for a LL(1) lookahead parser. Operator precedence is handled by nesting grammar rules, forcing higher-precedence operators to be evaluated deeper in the syntax tree.
+**Date of Submission:** June 02, 2026  
 
-### 2.1 Complete BNF Grammar
-The grammar is defined as follows (where `ε` represents the empty string/null production):
+---
 
-```bnf
-Program           ::= StatementList
+## Table of Contents
+1. **Introduction**
+2. **Methodology**
+3. **Compiler Subsystem Architecture**
+4. **Source Language context-Free Grammar (CFG) & BNF**
+5. **Pass 1: Lexical Analysis (Lexer) Design & Implementation**
+6. **Pass 2: Syntax and Semantic Analysis (Parser) Design & Implementation**
+7. **Symbol Table Stack & Simulated Memory Management**
+8. **Static Semantics & Type Checking System**
+9. **Intermediate Representation: Three-Address Code (TAC) Generation**
+10. **Error Handling & Synchronization Recovery Strategy**
+11. **User Interface (UI) & Integrated Development Environment (IDE) Walkthrough**
+12. **Challenges and Architectural Solutions**
+13. **Limitations and Future Work**
+14. **Conclusion**
+15. **Responsibility Matrix**
 
-StatementList     ::= Statement StatementList
-                    | ε
+---
 
-Statement         ::= Declaration
-                    | Assignment
-                    | Selection
-                    | Iteration
-                    | Print
+## 1. Introduction
 
-Declaration       ::= Type IDENTIFIER ";"
+Compilers are the foundation of systems programming, acting as the translation bridge between high-level human-readable source languages and low-level target machine formats. A classic compiler is divided into two major architectural domains: the **Analysis Phase (Front-End)** and the **Synthesis Phase (Back-End)**. The front-end analyzes the structure and meaning of the source code, while the back-end compiles it into an efficient target representation.
 
-Type              ::= "int"
-                    | "float"
+This project focuses on the design and implementation of a custom **Two-Pass Compiler** (Pass 1: Lexer, Pass 2: Parser and Semantic Analyzer) with an integrated **Intermediate Code Generator** that produces **Three-Address Code (TAC)**. 
 
-Assignment        ::= IDENTIFIER "=" Expression ";"
+### 1.1 Project Objectives
+The main objectives of this compiler project are:
+- **Hand-Coded Implementation**: Developing all compiler stages (Lexer, Parser, Symbol Table, Semantic Checkers, and IR Generator) completely from scratch in JavaScript without using any automatic parser generator tools like Lex, Yacc, or ANTLR.
+- **Lexical and Syntactic Validation**: Designing an LL(1) lookahead parser that processes variable declarations, assignment statements, conditional branches (`if-else`), loops (`while`), output commands (`print`), and complex arithmetic/logical expressions.
+- **Type Safety & Semantics Checking**: Implementing static semantic analysis to enforce scoping rules, detect duplicate declarations, check variable initialization, and enforce type compatibility across assignments and operations.
+- **Intermediate Representation (IR)**: Translating the verified Abstract Syntax Tree (AST) into linear Three-Address Code instructions featuring temporary registers and jump labels.
+- **Modern Cyberpunk UI**: Integrating the compiler into a web-based terminal OS dashboard (`COMPILER.EXE`) with side-by-side editing, scroll-sync line gutters, file uploads, and diagnostic error navigation.
 
-Selection         ::= "if" "(" Expression ")" Block ElsePart
+---
 
-ElsePart          ::= "else" Block
-                    | ε
+## 2. Methodology
 
-Iteration         ::= "while" "(" Expression ")" Block
+To prevent the compiler from becoming a monolithic block of code, the system is designed around the **Separation of Concerns** principle. The compilation workflow is structured into isolated sequential passes:
 
-Print             ::= "print" "(" PrintArg ")" ";"
-
-PrintArg          ::= STRING_LITERAL
-                    | Expression
-
-Block             ::= "{" StatementList "}"
-
-Expression        ::= LogicalOr
-
-LogicalOr         ::= LogicalAnd LogicalOrTail
-LogicalOrTail     ::= "||" LogicalAnd LogicalOrTail
-                    | ε
-
-LogicalAnd        ::= Equality LogicalAndTail
-LogicalAndTail    ::= "&&" Equality LogicalAndTail
-                    | ε
-
-Equality          ::= Relational EqualityTail
-EqualityTail      ::= "==" Relational EqualityTail
-                    | "!=" Relational EqualityTail
-                    | ε
-
-Relational        ::= Additive RelationalTail
-RelationalTail    ::= "<" Additive RelationalTail
-                    | ">" Additive RelationalTail
-                    | "<=" Additive RelationalTail
-                    | ">=" Additive RelationalTail
-                    | ε
-
-Additive          ::= Multiplicative AdditiveTail
-AdditiveTail      ::= "+" Multiplicative AdditiveTail
-                    | "-" Multiplicative AdditiveTail
-                    | ε
-
-Multiplicative    ::= Primary MultiplicativeTail
-MultiplicativeTail::= "*" Primary MultiplicativeTail
-                    | "/" Primary MultiplicativeTail
-                    | ε
-
-Primary           ::= IDENTIFIER
-                    | INTEGER_LITERAL
-                    | FLOAT_LITERAL
-                    | STRING_LITERAL
-                    | "(" Expression ")"
-                    | "-" Primary
-                    | "!" Primary
+```
++-------------+      Pass 1       +--------------+      Pass 2       +-------------+
+| Source Code |──────────────────>| Token Stream |──────────────────>| Parser (AST)|
++-------------+     (Lexer)       +--------------+     (Parser)      +-------------+
+                                         │                                  │
+                                         │ (Build Symbols)                  │ (Static Checks)
+                                         ▼                                  ▼
+                                  +──────────────+                   +─────────────+
+                                  | Symbol Table |                   |  Semantic   |
+                                  |  Scope Stack |                   |  Validation |
+                                  +──────────────+                   +─────────────+
+                                                                            │
+                                                                 Pass 3     ▼
+                                                                     +─────────────+
+                                                                     |  TAC (IR)   |
+                                                                     |  Generation |
+                                                                     +-------------+
 ```
 
-### 2.2 Operator Precedence and Associativity Structure
-The grammar naturally implements operator precedence through the call-stack order of parsing functions. The hierarchy of operators is resolved as follows:
-
-| Level | Operator | Description | Associativity | Parsing Rule |
-|:---:|:---:|:---|:---:|:---|
-| 1 (Highest) | `()`, `-`, `!` | Grouping, Unary Negations | Right-to-Left | `Primary` |
-| 2 | `*`, `/` | Multiplication, Division | Left-to-Right | `Multiplicative` |
-| 3 | `+`, `-` | Addition, Subtraction | Left-to-Right | `Additive` |
-| 4 | `<`, `>`, `<=`, `>=`| Relational Comparisons | Left-to-Right | `Relational` |
-| 5 | `==`, `!=` | Equality Checking | Left-to-Right | `Equality` |
-| 6 | `&&` | Logical Conjunction (AND) | Left-to-Right | `LogicalAnd` |
-| 7 (Lowest) | `\|\|` | Logical Disjunction (OR) | Left-to-Right | `LogicalOr` |
+1. **Pass 1: Lexical Analysis**: The lexer processes the source code string character-by-character. It matches valid substrings (lexemes) to emit structured tokens, while stripping comments and whitespaces.
+2. **Pass 2: Syntax and Semantic Analysis**: The parser consumes the tokens using a top-down **Recursive Descent** strategy. It verifies the syntax against the context-free grammar and builds a hierarchical AST. Concurrently, the semantic analyzer performs static checks using a block-scoped symbol table.
+3. **Pass 3: Intermediate Code Generation**: If no errors are detected, the TAC generator traverses the AST, translates expressions into temporary variable operations, and linearizes loops and conditional blocks using branching labels.
+4. **Interactive Visualization**: The web dashboard binds the outputs of these passes to UI panels, providing immediate feedback for testing.
 
 ---
 
-## 3. Pass 1: Lexical Analyzer (Lexer) Implementation
+## 3. Compiler Subsystem Architecture
 
-The Lexical Analyzer (Lexer) acts as the first pass of the compiler. It reads the source code character-by-character and groups them into a linear stream of **Tokens** while filtering out whitespaces and comments.
+The compiler codebase is structured into modular components, ensuring high maintainability and adhering to object-oriented programming principles:
 
-### 3.1 Token Object Model
-Every generated token is represented by a structured object mapping its metadata:
+| Subsystem Component | Role & Responsibility | Interface Hooks |
+|:---|:---|:---|
+| **`CompilerEngine`** | Main controller orchestrating compiler passes. | `compile(sourceCode)` |
+| **`Lexer`** | Scans characters and emits structured token lists. | `tokenize(sourceCode)` |
+| **`Parser`** | Validates syntax and outputs the AST. | `parse(tokens)` |
+| **`SymbolTable`** | Manages variable scopes, types, and memory offsets. | `pushScope()`, `popScope()`, `declare()` |
+| **`SemanticAnalyzer`** | Enforces static type compatibility and declaration scopes. | `check(astNode)` |
+| **`TACGenerator`** | Generates Three-Address Code from AST structures. | `generateTAC(ast)` |
+| **`IDE UI Interface`** | Renders tables, gutters, AST trees, and error highlights. | `initCompilerWindow()` |
+
+---
+
+## 4. Source Language Context-Free Grammar (CFG) & BNF
+
+The compiler processes a structured high-level programming language. The grammar is defined in Backus-Naur Form (BNF) below. It is designed to be unambiguous and free of left-recursion, which makes it ideal for a top-down recursive descent parser:
+
+```bnf
+<Program>           ::= <StatementList>
+
+<StatementList>     ::= <Statement> <StatementList>
+                      | ε
+
+<Statement>         ::= <Declaration>
+                      | <Assignment>
+                      | <Selection>
+                      | <Iteration>
+                      | <Print>
+
+<Declaration>       ::= <Type> IDENTIFIER ";"
+
+<Type>              ::= "int"
+                      | "float"
+
+<Assignment>        ::= IDENTIFIER "=" <Expression> ";"
+
+<Selection>         ::= "if" "(" <Expression> ")" <Block> <ElsePart>
+
+<ElsePart>          ::= "else" <Block>
+                      | ε
+
+<Iteration>         ::= "while" "(" <Expression> ")" <Block>
+
+<Print>             ::= "print" "(" <PrintArg> ")" ";"
+
+<PrintArg>          ::= STRING_LITERAL
+                      | <Expression>
+
+<Block>             ::= "{" <StatementList> "}"
+
+<Expression>        ::= <LogicalOr>
+
+<LogicalOr>         ::= <LogicalAnd> <LogicalOrTail>
+<LogicalOrTail>     ::= "||" <LogicalAnd> <LogicalOrTail>
+                      | ε
+
+<LogicalAnd>        ::= <Equality> <LogicalAndTail>
+<LogicalAndTail>    ::= "&&" <Equality> <LogicalAndTail>
+                      | ε
+
+<Equality>          ::= <Relational> <EqualityTail>
+<EqualityTail>      ::= "==" <Relational> <EqualityTail>
+                      | "!=" <Relational> <EqualityTail>
+                      | ε
+
+<Relational>        ::= <Additive> <RelationalTail>
+<RelationalTail>    ::= "<" <Additive> <RelationalTail>
+                      | ">" <Additive> <RelationalTail>
+                      | "<=" <Additive> <RelationalTail>
+                      | ">=" <Additive> <RelationalTail>
+                      | ε
+
+<Additive>          ::= <Multiplicative> <AdditiveTail>
+<AdditiveTail>      ::= "+" <Multiplicative> <AdditiveTail>
+                      | "-" <Multiplicative> <AdditiveTail>
+                      | ε
+
+<Multiplicative>    ::= <Primary> <MultiplicativeTail>
+<MultiplicativeTail>::= "*" <Primary> <MultiplicativeTail>
+                      | "/" <Primary> <MultiplicativeTail>
+                      | ε
+
+<Primary>           ::= IDENTIFIER
+                      | INTEGER_LITERAL
+                      | FLOAT_LITERAL
+                      | STRING_LITERAL
+                      | "(" <Expression> ")"
+                      | "-" <Primary>
+                      | "!" <Primary>
+```
+
+---
+
+## 5. Pass 1: Lexical Analysis (Lexer) Design & Implementation
+
+The Lexer scans the raw input string, groupings characters into lexical units called **Tokens**. It tracks source line and column numbers to provide detailed locations for compilation errors.
+
+### 5.1 Token Data Structure
+Every token generated by Pass 1 is represented as a structured object:
 ```json
 {
-  "type": "TOKEN_TYPE",
-  "value": "string_lexeme",
-  "line": 12,
-  "col": 4
+  "type": "IDENTIFIER",
+  "value": "result",
+  "line": 4,
+  "col": 1
 }
 ```
 
-### 3.2 Token Types and Classifications
-- **KEYWORD**: Reserved keywords representing type declarations (`int`, `float`), loops (`while`), branches (`if`, `else`), and output commands (`print`).
-- **IDENTIFIER**: Variable names. Matches regular expression `[a-zA-Z_][a-zA-Z0-9_]*`.
-- **INTEGER_LITERAL**: Positive decimal integer sequences (e.g., `42`, `0`).
-- **FLOAT_LITERAL**: Floating-point numbers containing a decimal point (e.g., `3.1415`, `0.05`).
-- **STRING_LITERAL**: Text sequences enclosed in double quotes (e.g., `"Result is large"`).
-- **OPERATOR**: Operator symbols (`+`, `-`, `*`, `/`, `=`, `==`, `!=`, `<`, `>`, `<=`, `>=`, `&&`, `||`, `!`).
+### 5.2 Token Categories
+- **KEYWORD**: Reserved identifiers (`int`, `float`, `if`, `else`, `while`, `print`).
+- **IDENTIFIER**: Matches variables conforming to the regex `[a-zA-Z_][a-zA-Z0-9_]*`.
+- **INTEGER_LITERAL**: Positive decimal digit sequences (e.g. `123`, `0`).
+- **FLOAT_LITERAL**: Decimals containing a single decimal point (e.g. `3.14`, `0.05`).
+- **STRING_LITERAL**: Text sequences enclosed in double quotes (e.g. `"Result is large"`).
+- **OPERATOR**: Mathematical and logical operators (`+`, `-`, `*`, `/`, `=`, `==`, `!=`, `<`, `>`, `<=`, `>=`, `&&`, `||`, `!`).
 - **DELIMITER**: Structural punctuation marks (`;`, `,`, `(`, `)`, `{`, `}`).
 
-### 3.3 Lexer Execution Steps and DFA Logic
+### 5.3 Scanning Algorithm and Lookahead Resolution
 The scanning loop uses a pointer `pos` to traverse the string:
-1. **Whitespace and Line Control**: Checks for spaces, tabs, and carriage returns. If `\n` is matched, the global `line` tracker is incremented, and `col` resets to 1.
-2. **Comment Skipping**:
-   - Single-line comments (`//`): When matching `//`, the scanner skips characters until a newline `\n` is hit.
-   - Block comments (`/* ... */`): When matching `/*`, the scanner skips characters until it finds `*/`. If the file ends without matching `*/`, a lexical error (*"Unterminated block comment"*) is thrown.
-3. **Identifier and Keyword Processing**: If a character is alphabetical (`[a-zA-Z_]`), it accumulates alphanumeric characters. The lexeme is matched against keywords (`int`, `float`, etc.); if it matches, a `KEYWORD` token is emitted, otherwise an `IDENTIFIER` token is created.
-4. **Number Processing**: If a character is a digit (`[0-9]`), it is accumulated. If a dot `.` is encountered, the scanner continues accumulating digits for the fraction part.
-   - *Lexical Checks*: If multiple dots are found (e.g. `3.14.15`), a malformed literal error is reported. If a number ends with a dot (e.g. `3.`), it throws an error.
-5. **String Matching**: If a double quote `"` is matched, the lexer scans until it finds the closing `"`. If a newline occurs before the quote is closed, it logs an unterminated string error.
-6. **Compound Operator Resolution**: For characters like `=`, `!`, `<`, `>`, `&`, `|`, the lexer checks the lookahead character. It matches compound operators like `==`, `!=`, `<=`, `>=`, `&&`, `||` first. If the next character does not form a compound operator, it falls back to single-character operators.
-7. **Delimiters**: Punctuation symbols (`;`, `,`, `(`, `)`, `{`, `}`) are matched directly.
-8. **Invalid Characters**: Any character not matching these rules (e.g. `$`, `#`, `@`) is caught as a lexical error (*"Unexpected character 'x'"*).
+- **Comments and Whitespace**: Ignored. Single-line comments (`//`) are skipped until a newline is found. Multi-line comments (`/* ... */`) are skipped until the closing `*/` is matched; an unclosed block comment throws a lexical error.
+- **Numeric Parsing**: Scans digit sequences. If a dot `.` is encountered, it switches to float parsing.
+  - *Lexical Checks*: If multiple dots are found (e.g. `3.14.15`), the lexer logs a malformed float error. If a number ends with a dot (e.g. `3.`), it throws an error.
+- **Double-Character Operators**: To distinguish between single operators (like `=` or `<`) and compound operators (like `==` or `<=`), the lexer checks the lookahead character. It matches compound operators first, falling back to single characters if the lookahead does not form a compound operator.
+- **Lexical Errors**: Any character not matching these categories (e.g., `$`, `#`, `@`) is reported as an unexpected character error with its exact line and column numbers.
 
 ---
 
-## 4. Pass 2: Parser and Semantic Analyzer
+## 6. Pass 2: Syntax and Semantic Analysis (Parser)
 
-The Parser takes the linear token stream produced by the Lexer and constructs a hierarchical representation of the program structure.
+The Parser validates the token stream against the context-free grammar and builds a hierarchical Abstract Syntax Tree (AST).
 
-### 4.1 Recursive Descent Parsing
-We implement a top-down recursive descent parsing architecture. The parser has a set of recursive helper functions matching the rules of our BNF grammar. Starting from the root rule `parseProgram()`, it evaluates the token stream using a single-token lookahead.
+### 6.1 Recursive Descent Parsing
+We implement a top-down recursive descent parsing strategy. The parser uses recursive functions matching the grammar rules. Starting with the root rule `parseProgram()`, it evaluates the token stream using a single-token lookahead. If the stream deviates from the grammar, the parser throws a syntax error stating what was expected versus what was found.
 
-### 4.2 Abstract Syntax Tree (AST) Nodes
-The result of parsing is an **Abstract Syntax Tree (AST)**, where every statement and expression is modeled as a tree node:
+### 6.2 Abstract Syntax Tree (AST) Node Structures
+The AST represents the program structure as a tree of nodes:
 
-| Node Type | Properties | Description |
-|:---|:---|:---|
-| `Program` | `body` (Array of Statement Nodes) | Root node of the program. |
-| `VarDecl` | `varType` (int/float), `id` (name), `line` | Variable declaration statement. |
-| `Assignment` | `id` (LHS), `expr` (RHS Node), `line` | Variable assignment statement. |
-| `IfStatement` | `cond` (Expr Node), `thenBranch` (Block), `elseBranch` (Block) | Branching control flow statement. |
-| `WhileStatement` | `cond` (Expr Node), `body` (Block Node) | Iteration loop control flow statement. |
-| `PrintStatement` | `arg` (Literal or Expr Node) | Output statement. |
-| `Block` | `body` (Array of Statement Nodes) | Local scope container block. |
-| `BinaryExpr` | `operator`, `left` (Node), `right` (Node), `evalType` | Binary expression operator node. |
-| `UnaryExpr` | `operator`, `right` (Node), `evalType` | Unary negation node (`-` or `!`). |
-| `Literal` | `valueType` (int/float/string), `value` | Primitive value literal node. |
-| `Identifier` | `name`, `evalType` | Variable lookup expression node. |
+```
+                            [Program]
+                                │
+                       [Statement List]
+                        /      │       \
+                   [VarDecl] [VarDecl]  [Assignment]
+                    /    \    /    \       /     \
+                  int     x float   y     x       [BinaryExpr]
+                                                   /     |     \
+                                             [Ident]    op   [Lit]
+                                                y       *      2
+```
+
+- **`Program`**: Root node containing an array of statements in its `body`.
+- **`VarDecl`**: Variable declaration node storing the `varType` (`int` or `float`) and the identifier `id`.
+- **`Assignment`**: Assignment statement node storing the target variable `id` and the RHS `expr` node.
+- **`IfStatement`**: Conditional branch node storing the condition `cond` expression, the `thenBranch` block, and the optional `elseBranch` block.
+- **`WhileStatement`**: Loop statement node storing the condition `cond` expression and the `body` block.
+- **`PrintStatement`**: Output node storing the argument `arg` expression or string literal.
+- **`BinaryExpr`**: Operator node storing the `operator` and pointers to `left` and `right` expressions.
 
 ---
 
-## 5. Symbol Table and Scope Management
+## 7. Symbol Table Stack & Simulated Memory Management
 
-The Symbol Table stores information about declared variables, including their type, scope depth, and simulated memory layout.
+The Symbol Table stores information about declared variables, such as their type, scope depth, and simulated memory layout.
 
-### 5.1 Hierarchical Scoping Stack
+### 7.1 Scope Stack Implementation
 To support local scopes within blocks (`{ ... }`), the Symbol Table uses a **Stack of HashMaps**.
 - When the parser enters a block (`{`), a new scope map is pushed onto the stack.
 - When exiting a block (`}`), the top scope map is popped off the stack.
+This ensures variables declared inside blocks are not accessible from outer scopes, conforming to block-scoped variable rules.
 
-### 5.2 Symbol Record Attributes
+### 7.2 Variable Memory Layout Simulation
 For each declared variable, the table records:
-1. **Name**: The variable name.
-2. **Type**: `int` or `float`.
-3. **Scope Level**: The scope depth (0 for global scope, 1 for first nested block scope, etc.).
-4. **Memory Offset**: A simulated memory address. To simulate a real hardware environment, we calculate offsets based on types:
-   - `int` variables reserve **4 bytes** of memory.
-   - `float` variables reserve **8 bytes** of memory.
-   - The memory offset counter increments globally with each declaration.
-5. **Declared Line**: The line number where the variable was defined.
+- **Name**: The variable identifier.
+- **Type**: `int` or `float`.
+- **Scope Level**: The scope depth (0 for global scope, 1 for block scope, etc.).
+- **Memory Offset**: A simulated memory address. To simulate a real hardware environment, we calculate offsets based on types:
+  - `int` variables reserve **4 bytes** of memory.
+  - `float` variables reserve **8 bytes** of memory.
+  - The memory offset counter increments globally with each declaration.
+- **Declared Line**: The line number where the variable was defined.
+
+### 7.3 Simulated Memory Allocation Map Example:
+For the declarations:
+```c
+int x;
+int y;
+float result;
+```
+The symbol table maps variables to the following memory offsets:
+
+| Variable Name | Data Type | Scope Level | Memory Offset (Hex) | Declared Line |
+|:---:|:---:|:---:|:---:|:---:|
+| `x` | `int` | 0 | `0x0000` (Bytes 0-3) | Line 2 |
+| `y` | `int` | 0 | `0x0004` (Bytes 4-7) | Line 3 |
+| `result` | `float` | 0 | `0x0008` (Bytes 8-15) | Line 4 |
 
 ---
 
-## 6. Static Semantic Analysis and Type System
+## 8. Static Semantics & Type Checking System
 
-Static semantic checks verify that the program follows the rules of the language before runtime. The semantic analyzer runs during parsing and throws semantic errors if rules are violated:
+The compiler enforces static typing. Expressions evaluate to a type (`int`, `float`, or `string`), which is verified for compatibility. Semantic checks are performed during parsing:
 
-### 6.1 Variable Scoping Checks
-- **Duplicate Declaration**: When a variable declaration (`Type ID;`) is compiled, the symbol table checks if that name is already defined *within the current scope*. If so, a redeclaration error is thrown:
+### 8.1 Declaration and Scope Verification
+- **Redeclaration Check**: When a variable declaration (`Type ID;`) is compiled, the symbol table checks if that name is already defined *within the current scope*. If so, a duplicate declaration error is thrown:
   `Semantic Error (Line L): Variable 'x' is already declared in this scope`.
-- **Undeclared Variables**: When a variable is used in assignments, expressions, or print statements, the compiler searches the scope stack from the current scope level up to the global scope. If it is not found in any scope, an error is thrown:
+- **Usage Check**: When a variable is used in assignments, expressions, or print statements, the compiler searches the scope stack from the current scope level up to the global scope. If it is not found in any scope, an error is thrown:
   `Semantic Error (Line L): Undeclared variable 'x' used in expression/assignment`.
 
-### 6.2 Type Inference and Type Checking Rules
-The compiler enforces static typing. Expressions evaluate to a type (`int`, `float`, or `string`), which is verified for compatibility:
-- **Assignment Type Rules**:
-  - Assigning a value to an `int` variable: The expression must evaluate to `int`. If it evaluates to `float` or `string`, a type mismatch error is thrown.
-  - Assigning a value to a `float` variable: The expression can evaluate to `float` or `int` (integers are promoted to float implicitly). Assigning a `string` is rejected.
-- **Arithmetic Type Rules**:
-  - The operands of arithmetic operations (`+`, `-`, `*`, `/`) must be numeric (`int` or `float`). Operations on strings are rejected.
-  - If both operands are `int`, the expression evaluates to `int`.
-  - If one or both operands are `float`, the expression evaluates to `float` (implicit promotion).
-- **Comparison Type Rules**:
-  - Relational operations (`<`, `>`, `<=`, `>=`) require both operands to be numeric.
-  - Equality operations (`==`, `!=`) allow comparing numeric types, or string types with other strings. Comparing a string with a numeric type throws a type mismatch error.
-- **Logical Operations**:
-  - Operands of logical operations (`&&`, `||`, `!`) must be numeric (non-string). They return `int` (where 0 represents false, and 1 represents true).
+### 8.2 Type Compatibility Rules
+The type checker enforces compile-time safety:
+1. **Assignment Checks**:
+   - Assigning a value to an `int` variable: The expression must evaluate to `int`. If it evaluates to `float` or `string`, a type mismatch error is thrown.
+   - Assigning a value to a `float` variable: The expression can evaluate to `float` or `int` (integers are promoted to float implicitly). Assigning a `string` is rejected.
+2. **Operator Checks**:
+   - The operands of arithmetic operations (`+`, `-`, `*`, `/`) must be numeric (`int` or `float`). Operations on strings are rejected.
+   - If both operands are `int`, the expression evaluates to `int`.
+   - If one or both operands are `float`, the expression evaluates to `float` (implicit promotion).
+3. **Comparison Checks**:
+   - Relational operations (`<`, `>`, `<=`, `>=`) require both operands to be numeric.
+   - Equality operations (`==`, `!=`) allow comparing numeric types, or string types with other strings. Comparing a string with a numeric type throws a type mismatch error.
+4. **Logical Operations**:
+   - Operands of logical operations (`&&`, `||`, `!`) must be numeric (non-string). They return `int` (where 0 represents false, and 1 represents true).
 
 ---
 
-## 7. Intermediate Representation (Three-Address Code)
+## 9. Intermediate Representation: Three-Address Code (TAC) Generation
 
 To satisfy the compiler requirement of translating source code into intermediate code, we implemented a **Three-Address Code (TAC)** generator. 
 
 Three-Address Code represents a program as a sequence of simple instructions with at most three operands, resembling assembly language.
 
-### 7.1 Instruction Format
+### 9.1 TAC Instruction Structure
 TAC instructions use temporary variables (`t0`, `t1`, `t2`...) and label names (`L0`, `L1`...) for control flow:
 - **Binary operations**: `temp = operand1 op operand2`
 - **Unary operations**: `temp = op operand1`
@@ -254,7 +330,8 @@ TAC instructions use temporary variables (`t0`, `t1`, `t2`...) and label names (
 - **Jumps and Labels**: `ifFalse condition goto Label`, `goto Label`, `Label:`
 - **Print operations**: `print operand`
 
-### 7.2 Translation Rules
+### 9.2 Control Flow Linearization Rules
+The TAC generator traverses the AST recursively:
 - **Arithmetic Expressions**: Nested arithmetic operations are broken down into temporary variables. For example, `result = x + y * 2` yields:
   ```assembly
   t0 = y * 2
@@ -286,16 +363,16 @@ TAC instructions use temporary variables (`t0`, `t1`, `t2`...) and label names (
 
 ---
 
-## 8. Error Handling and Recovery Strategy
+## 10. Error Handling & Synchronization Recovery Strategy
 
 A high-quality compiler must report compile-time errors clearly instead of crashing on the first error. We implemented a robust error recovery and reporting strategy:
 
-### 8.1 Error Categories
-1. **Lexical Errors**: Catch unrecognized symbols and malformed literals (unclosed comments, malformed float numbers). The lexer reports the exact line and column numbers.
-2. **Syntax Errors**: Catch grammatical mismatches (e.g., missing semicolons, missing brackets, unbalanced parentheses).
-3. **Semantic Errors**: Catch logical rule violations (undeclared variables, duplicate declarations, type compatibility errors).
+### 10.1 Error Classifications
+- **Lexical Errors**: Catch unrecognized symbols and malformed literals (unclosed comments, malformed float numbers). The lexer reports the exact line and column numbers.
+- **Syntax Errors**: Catch grammatical mismatches (e.g., missing semicolons, missing brackets, unbalanced parentheses).
+- **Semantic Errors**: Catch logical rule violations (undeclared variables, duplicate declarations, type compatibility errors).
 
-### 8.2 Parser Synchronization and Error Recovery
+### 10.2 Error Recovery via Statement Synchronization
 If a syntax error occurs during statement parsing, the compiler does not stop. Instead, it catches the exception, logs it, and executes a **synchronization routine**:
 - The parser skips tokens until it finds a statement boundary delimiter (a semicolon `;` or a closing brace `}`).
 - Once a delimiter is found, the parser recovers and continues parsing subsequent statements.
@@ -303,59 +380,74 @@ If a syntax error occurs during statement parsing, the compiler does not stop. I
 
 ---
 
-## 9. User Interface Design and Logic
+## 11. User Interface (UI) & Integrated Development Environment (IDE) Walkthrough
 
 The compiler interface is integrated into the **Holo-Cyber OS Portfolio Desktop**:
 
-1. **Draggable Window Shell**: Built using CSS flexbox. Supports dragging via the title bar and taskbar tab switching.
-2. **Source Code Editor**: A side-by-side layout:
-   - An active line number gutter that updates dynamically as you type.
-   - Live cursor tracking showing line and column metrics (e.g., `LN 10, COL 4`).
-   - Gutter highlighting indicating the line currently being edited.
-3. **Control Buttons**:
-   - **`LOAD_SAMPLE`**: Loads the valid sample program containing variable declarations, arithmetic expressions, if-else statements, print commands, and a while loop.
-   - **`UPLOAD_FILE`**: Opens a file dialog allowing you to load text files from your disk.
-   - **`CLEAR`**: Resets the editor and diagnostics panels.
-   - **`RUN_COMPILER()`**: Runs lexical, syntax, and semantic checks on the source code.
-4. **Tab Panels**:
-   - **`LEXER`**: Renders a table of the scanned token stream (Line, Token, Type). Clicking a row highlights the corresponding line in the editor.
-   - **`SYMBOLS`**: Lists all variables, showing their scope levels, types, and hexadecimal memory offsets (e.g. `0x0000`, `0x0004`, `0x000C`).
-   - **`AST_TREE`**: Visualizes the parsed AST hierarchy in a clean ASCII tree diagram.
-   - **`IR_CODE`**: Displays the generated Three-Address Code (TAC).
-   - **`DIAGS`**: Shows success statuses or a list of colored error cards. Clicking an error card centers and highlights that line in the editor.
+- **Draggable Window Shell**: Built using CSS flexbox. Supports dragging via the title bar and taskbar tab switching.
+- **Source Code Editor**: A side-by-side layout:
+  - An active line number gutter that updates dynamically as you type.
+  - Live cursor tracking showing line and column metrics (e.g., `LN 10, COL 4`).
+  - Gutter highlighting indicating the line currently being edited.
+- **Control Buttons**:
+  - **`LOAD_SAMPLE`**: Loads the valid sample program containing variable declarations, arithmetic expressions, if-else statements, print commands, and a while loop.
+  - **`UPLOAD_FILE`**: Opens a file dialog allowing you to load text files from your disk.
+  - **`CLEAR`**: Resets the editor and diagnostics panels.
+  - **`RUN_COMPILER()`**: Runs lexical, syntax, and semantic checks on the source code.
+- **Tab Panels**:
+  - **`LEXER`**: Renders a table of the scanned token stream (Line, Token, Type). Clicking a row highlights the corresponding line in the editor.
+  - **`SYMBOLS`**: Lists all variables, showing their scope levels, types, and hexadecimal memory offsets (e.g. `0x0000`, `0x0004`, `0x000C`).
+  - **`AST_TREE`**: Visualizes the parsed AST hierarchy in a clean ASCII tree diagram.
+  - **`IR_CODE`**: Displays the generated Three-Address Code (TAC).
+  - **`DIAGS`**: Shows success statuses or a list of colored error cards. Clicking an error card centers and highlights that line in the editor.
 
 ---
 
-## 10. Challenges Faced and Solutions
+## 12. Challenges and Architectural Solutions
 
-### 10.1 Challenge 1: Left Recursion and Precedence in Expressions
+### 12.1 Challenge 1: Left Recursion and Precedence in Expressions
 *Problem*: Traditional expression rules in BNF often contain left-recursion (e.g. `E -> E + T`), which causes recursive descent parsers to loop infinitely.
 *Solution*: We eliminated left-recursion by rewriting rules using EBNF repetitions (equivalent to loops in code) and structured functions from lowest to highest precedence (LogicalOr -> LogicalAnd -> Equality -> Relational -> Additive -> Multiplicative -> Primary).
 
-### 10.2 Challenge 2: Gutter Line Synchronization
+### 12.2 Challenge 2: Gutter Line Synchronization
 *Problem*: Textarea components do not natively support scrolling sync with a separate line number column.
 *Solution*: We added an event listener in `app.js` that splits text values by newline, generates line numbers dynamically, and binds the gutter's `scrollTop` directly to the textarea's scroll position.
 
-### 10.3 Challenge 3: Maintaining Variable Offsets across Scopes
+### 12.3 Challenge 3: Maintaining Variable Offsets across Scopes
 *Problem*: A naive implementation reset memory offsets on block exit, which could overwrite variables in outer scopes.
 *Solution*: We decoupled variable scope levels from their memory allocations. Offsets are tracked globally and incremented by 4 or 8 bytes depending on type declarations, keeping memory assignments safe across scopes.
 
 ---
 
-## 11. Conclusion and Team Responsibilities
+## 13. Limitations and Future Work
 
-The compiler design project meets all the requirements of the System Programming course:
-- All components (Lexer, Parser, Symbol Table, Semantic Analyzer, and TAC generator) were written manually from scratch in JavaScript without using any external parser generators.
-- Built a web-based GUI window matching the portfolio's cyberpunk visual theme.
-- Successfully verified syntax and semantic checks using the university's sample program and testing scenarios.
+While the compiler implements all requirements of the System Programming course, potential expansions include:
+- **Optimization Passes**: Implementing constant folding (e.g., simplifying `3 * 2` to `6` at compile time) and dead code elimination to optimize TAC generation.
+- **Target Assembly Code Generation**: Translating Three-Address Code into assembly code (like MIPS or x86 assembly) to generate executable output.
+- **Function Declarations**: Expanding the grammar and symbol table structure to support function definitions with local parameters and return values.
 
-### 11.1 Student Responsibility
-- **Sercan Özkan (SercanOzkan55)**:
-  - Designed the CFG context-free grammar.
-  - Implemented the character-by-character Lexer scanner.
-  - Coded the Recursive Descent Parser and AST tree builder.
-  - Wrote the block-scoped Symbol Table and simulated memory layout.
-  - Implemented semantic type-checking logic.
-  - Wrote the Three-Address Code intermediate representation generator.
-  - Built the web GUI dashboard and interactive event bindings.
-  - Prepared the academic project report and verification plan.
+---
+
+## 14. Conclusion
+
+This project successfully implements a **Two-Pass Compiler** (augmented with a third pass for Three-Address Code generation) for a structured subset of a high-level imperative programming language. 
+
+By building all compiler stages manually from scratch, we demonstrated:
+- Character-by-character tokenization in Pass 1.
+- Syntactic verification and AST building in Pass 2.
+- Scoping rules and static type safety in the Semantic Analyzer.
+- Linearization and control-flow translation in the TAC Generator.
+- IDE integration in the visual OS dashboard.
+
+Ultimately, this design strategy achieves high modularity and clean architectural separation of concerns, fulfilling all university course specifications.
+
+---
+
+## 15. Responsibility Matrix
+
+For this project submission, the contributions of the group members are allocated as follows:
+
+| Group Member Name | Student ID | Core Contribution Areas | Project Responsibility Share |
+|:---|:---:|:---|:---:|
+| **Sercan Özkan** | **220611005** | Designed Context-Free Grammar, coded Lexer DFA tokenizer, implemented Parser AST nodes, built block scope stack, programmed TAC generator. | 50% |
+| **Berat Kahraman** | **220610038** | Wrote Semantic Analyzer type checkers, configured scope lookup, designed UI window structures, implemented file upload FileReader logic, prepared project documentation. | 50% |
