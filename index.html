@@ -401,10 +401,12 @@ Idea Model -> Logical Prototype -> DB Integration -> UI Polish</pre>
                 <div style="font-size:0.6rem; color:var(--text-main);">
                   LANGUAGE: SUBSET_HIGH_LEVEL • PASSES: 2 • COMPILER: HAND-CODED
                 </div>
-                <div style="display:flex; gap:0.5rem;">
+                 <div style="display:flex; gap:0.5rem;">
                   <button class="theme-opt-btn" id="btn-comp-sample" style="padding:4px 10px; font-size:0.5rem;">LOAD_SAMPLE</button>
+                  <button class="theme-opt-btn" id="btn-comp-upload" style="padding:4px 10px; font-size:0.5rem;">UPLOAD_FILE</button>
                   <button class="theme-opt-btn" id="btn-comp-clear" style="padding:4px 10px; font-size:0.5rem;">CLEAR</button>
                   <button class="form-submit-btn" id="btn-comp-run" style="padding:4px 12px; font-size:0.55rem; box-shadow:0 0 8px var(--primary-glow);">RUN_COMPILER()</button>
+                  <input type="file" id="compiler-file-input" style="display:none;" accept=".txt,.src,.c,.cpp,.h,.txt"/>
                 </div>
               </div>
 

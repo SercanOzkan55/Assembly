@@ -1,0 +1,36 @@
+{
+  "schema": "cv_analyzer.local_worker.sync_manifest.v1",
+  "job": {
+    "id": null,
+    "name": "Deneme",
+    "config": {
+      "job_id": "local",
+      "title": "Deneme",
+      "description": "We are looking for a Software Engineering Intern or Junior Developer with a solid background in backend development and AI integration. \n\nKey Responsibilities:\n- Design and develop scalable API endpoints using Python, FastAPI or similar frameworks.\n- Integrate large language models (LLMs) like OpenAI, Gemini, Claude, and DeepSeek to build intelligent application features.\n- Build real-time systems, client-server architectures, or work with streaming protocols (RTSP/RTP).\n- Optimize application latency, algorithms, and performance.\n- Collaborate with frontend teams working on React, TypeScript, or JavaScript.\n\nRequirements:\n- Enrolled in or graduated from a Computer Engineering or related program.\n- Good hands-on experience in Python or Java.\n- Familiarity with web frameworks (FastAPI, React).\n- Basic understanding of client-server networking (Sockets, TCP/IP).\n- Passion for software optimization, image processing, or video streaming.",
+      "required_skills": [],
+      "nice_to_have_skills": [],
+      "hard_reject_criteria": [],
+      "accept_threshold": 75,
+      "review_threshold": 50,
+      "reject_threshold": 0,
+      "scoring_weights": {
+        "required_skills": 70,
+        "nice_to_have_skills": 20,
+        "content_quality": 10
+      }
+    }
+  },
+  "run": {
+    "cv_folder": "C:\\Users\\ASUS\\Desktop\\Yeni klasör (2)",
+    "output_folder": "C:\\Users\\ASUS\\Desktop\\Yeni klasör",
+    "total_files": 19,
+    "processed": 19,
+    "failed": 0,
+    "created_at": "2026-05-25T10:49:06.158970Z"
+  },
+  "results_file": "C:\\Users\\ASUS\\Desktop\\Yeni klasör\\local_worker_results.json",
+  "csv_file": "C:\\Users\\ASUS\\Desktop\\Yeni klasör\\local_worker_results.csv",
+  "html_report": "C:\\Users\\ASUS\\Desktop\\Yeni klasör\\local_worker_report.html",
+  "failed_files": [],
+  "sync_status": "offline_ready"
+}

@@ -1347,8 +1347,27 @@ function initCompilerWindow() {
 
   // Action Buttons
   const sampleBtn = document.getElementById('btn-comp-sample');
+  const uploadBtn = document.getElementById('btn-comp-upload');
+  const fileInput = document.getElementById('compiler-file-input');
   const clearBtn = document.getElementById('btn-comp-clear');
   const runBtn = document.getElementById('btn-comp-run');
+
+  uploadBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    fileInput.click();
+  });
+
+  fileInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      editor.value = evt.target.result;
+      updateGutter();
+      updateCursorPos();
+    };
+    reader.readAsText(file);
+  });
 
   sampleBtn.addEventListener('click', (e) => {
     e.preventDefault();
