@@ -401,6 +401,16 @@ The compiler interface is integrated into the **Holo-Cyber OS Portfolio Desktop*
   - **`IR_CODE`**: Displays the generated Three-Address Code (TAC).
   - **`DIAGS`**: Shows success statuses or a list of colored error cards. Clicking an error card centers and highlights that line in the editor.
 
+### 11.1 Compiler Application Dashboard Screenshots
+
+The following screenshots demonstrate the integrated compiler app (`COMPILER.EXE`) running within the Holo-Cyber OS desktop:
+
+![Lexer Token Stream Panel](compiler_lexer_screenshot.png)
+
+![Abstract Syntax Tree (AST) Tab Panel](compiler_ast_screenshot.png)
+
+![Diagnostics Panel with Syntax Errors Highlighted](compiler_diags_screenshot.png)
+
 ---
 
 ## 12. Challenges and Architectural Solutions

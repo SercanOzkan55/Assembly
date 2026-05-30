@@ -433,11 +433,13 @@ class CompilerEngine {
       consume("DELIMITER", ";", "Expected ';' at the end of declaration");
 
       declareVariable(idToken.value, typeToken.value, typeToken.line);
+      let varRecord = lookupVariable(idToken.value);
 
       return {
         type: "VarDecl",
         varType: typeToken.value,
         id: idToken.value,
+        scopeLevel: varRecord ? varRecord.scopeLevel : (this.scopeStack.length - 1),
         line: typeToken.line
       };
     };
@@ -484,6 +486,7 @@ class CompilerEngine {
       return {
         type: "Assignment",
         id: idToken.value,
+        scopeLevel: varRecord ? varRecord.scopeLevel : 0,
         expr: expr,
         line: idToken.line
       };
@@ -793,6 +796,7 @@ class CompilerEngine {
         return {
           type: "Identifier",
           name: t.value,
+          scopeLevel: varRecord ? varRecord.scopeLevel : 0,
           evalType: varRecord ? varRecord.type : "int", // fallback to int
           line: t.line
         };
@@ -1008,12 +1012,12 @@ class CompilerEngine {
           return "";
 
         case "VarDecl":
-          codeLines.push(`// declare ${node.varType} ${node.id}`);
+          codeLines.push(`// declare ${node.varType} ${node.id}_${node.scopeLevel}`);
           return "";
 
         case "Assignment": {
           const rhs = walk(node.expr);
-          codeLines.push(`${node.id} = ${rhs}`);
+          codeLines.push(`${node.id}_${node.scopeLevel} = ${rhs}`);
           return "";
         }
 
@@ -1078,7 +1082,7 @@ class CompilerEngine {
           return node.value.toString();
 
         case "Identifier":
-          return node.name;
+          return `${node.name}_${node.scopeLevel}`;
 
         default:
           return "";
