@@ -759,6 +759,17 @@ class CompilerEngine {
           evalType = "float";
         }
 
+        // Semantic Check: Division by zero
+        if (opToken.value === "/") {
+          if (right.type === "Literal" && (right.value === 0 || right.value === 0.0)) {
+            this.errors.push({
+              phase: "Semantic",
+              message: "Division by zero is not allowed",
+              line: opToken.line
+            });
+          }
+        }
+
         node = {
           type: "BinaryExpr",
           operator: opToken.value,
