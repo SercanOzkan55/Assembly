@@ -464,7 +464,23 @@ Ultimately, this design strategy achieves high modularity and clean architectura
 
 ## 15. Responsibility Matrix
 
-For this project submission, the contributions of the group members are allocated as follows:
+To guarantee a balanced workload and ensure maximum cohesion between the core compiler engine and the front-end dashboard, the division of labor was structured strictly. The group members collaborated on the overall system architecture, while dividing implementation tasks into specialized areas:
+
+### 15.1 Detailed Work Breakdown and Core Duties
+
+- **Sercan Özkan**:
+  - **DFA Lexical Analysis & Scanner**: Programmed the scanner loop in `tokenize()`, implemented string/float literal state machines, lookahead resolution for double-character operators, and line/column metrics tracking.
+  - **Syntax Parsing (Recursive Descent)**: Coded the LL(1) grammar parser rules (statements, selections, iterations, expressions, primary nodes) and established operator precedence hierarchy.
+  - **Symbol Table Stack**: Engineered the stack of Maps representing local block scopes.
+  - **Intermediate Code (TAC) Generation**: Programmed the linearized TAC translation walk including register (`t0`, `t1`...) and branching label (`L0`, `L1`...) generation, and implemented the variable scope suffixing (`x_0`, `x_1`) shadowing resolution.
+  
+- **Berat Kahraman**:
+  - **Static Semantics & Type Safety Checking**: Implemented scoping verification (undeclared and redeclared checks) and type compatibility checks for assignments, arithmetic, and logical operations, including compile-time division by zero checks.
+  - **Memory Layout Simulator**: Configured global offset counters allocating 4 bytes for `int` and 8 bytes for `float` variables.
+  - **Visual GUI & Gutter Line Sync**: Designed the cyberpunk OS dashboard interface, editor gutters, draggable window wrappers, diagnostic error cards, and implemented HTML5 `FileReader` file uploads.
+  - **Academic Documentation**: Structured the BNF grammar representation, compiler methodology flowchart, memory offset charts, challenges walkthroughs, and configured automated word report compilation scripts.
+
+### 15.2 Distribution of Project Contributions
 
 | Group Member Name | Student ID | Core Contribution Areas | Project Responsibility Share |
 |:---|:---:|:---|:---:|
