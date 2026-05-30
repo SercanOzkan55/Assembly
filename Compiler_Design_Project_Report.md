@@ -17,7 +17,7 @@
 * **Berat Kahraman** | Student ID: **220610038**
 
 ### Submitted to:
-* **Academic Course Faculty**
+* **Instructor Nazlı Tokatlı**
 
 **Date of Submission:** June 02, 2026  
 
