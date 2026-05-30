@@ -405,11 +405,20 @@ The compiler interface is integrated into the **Holo-Cyber OS Portfolio Desktop*
 
 The following screenshots demonstrate the integrated compiler app (`COMPILER.EXE`) running within the Holo-Cyber OS desktop:
 
-![Lexer Token Stream Panel](compiler_lexer_screenshot.png)
+#### 11.1.1 Lexical Analyzer (Lexer) Token Stream Visualizations
+![Lexer Stream Sample 1](lexer1.png)
+![Lexer Stream Sample 2](lexer2.png)
+![Lexer Stream Sample 3](lexer3.png)
+![Lexer Stream Sample 4](lexer4.png)
 
-![Abstract Syntax Tree (AST) Tab Panel](compiler_ast_screenshot.png)
+#### 11.1.2 Abstract Syntax Tree (AST) Tab Visualizations
+![AST Hierarchy Visual 1](ast1.png)
+![AST Hierarchy Visual 2](ast2.png)
+![AST Hierarchy Visual 3](ast3.png)
 
-![Diagnostics Panel with Syntax Errors Highlighted](compiler_diags_screenshot.png)
+#### 11.1.3 Diagnostics Panel (Syntax & Semantic Error Warnings)
+![Compiler Error Warnings Sample 1](diag1.png)
+![Compiler Error Warnings Sample 2](diag2.png)
 
 ---
 
